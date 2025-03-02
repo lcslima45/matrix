@@ -30,6 +30,70 @@ func Identity(n int) [][]float64 {
 	return id
 }
 
+func Transpose(m [][]float64) [][]float64 {
+	var t [][]float64
+	for i := 0; i < len(m); i++ {
+		t = append(t, Columns(m,i))
+	}
+	return t
+}
+
+
+func Lines(m [][]float64, l int) []float64 {
+	return m[l]
+}
+
+func Columns(m [][]float64, c int) []float64 {
+	var column []float64
+	for l := 0; l < len(m); l++ {
+		column = append(column, m[l][c])
+	}
+	return column
+}
+
+func CrossProduct(a1, a2 []float64) float64 {
+	if len(a1) != len(a2) {
+		return math.NaN()
+	}
+	var sum float64
+	for i := 0; i < len(a1); i++ {
+		sum += a1[i] * a2[i] 
+	}
+	return sum 
+}
+
+func SumMatrix(m1, m2 [][]float64) [][]float64 {
+	if len(m1) != len(m2) || len(m1[0]) != len(m2[0]) {
+		return nil
+	}
+	var result [][]float64
+	for i := 0; i < len(m1); i++ {
+		var l []float64
+		for j := 0; j < len(m1[0]); j++ {
+			l = append(l, m1[i][j] + m2[i][j]) 
+		}
+		result = append(result, l)
+	}
+
+	return result
+}
+
+func MatrixProduct(m1, m2 [][]float64) [][]float64 {
+	if len(m1[0]) != len(m2) {
+		return nil
+	}
+	var result [][]float64
+	for i := 0; i < len(m1); i++ {
+		var l []float64
+		for j := 0; j < len(m2[0]); j++ {
+			l = append(l, CrossProduct(Lines(m1,i), Columns(m2,j)))
+		}
+		result = append(result, l)
+	}
+
+	return result 
+}
+
 func CofactorMatrix(m [][]float64, i, j int) [][]float64 {
 	var n [][]float64
 	for i2 := 0; i2 < len(m); i2++ {
@@ -69,5 +133,19 @@ func DetLaplace(m [][]float64) float64 {
 }
 
 func main() {
-	OutputMatrix(Identity(100))
+	matriz1 := [][]float64{
+        {1, 2, 3},
+        {4, 8, 6},
+        {7, 8, 10},
+    }
+	matriz2 := [][]float64{
+        {2, 3, 4},
+        {5, 6, 7},
+        {8, 9, 11},
+    }
+
+	WriteMatrix(SumMatrix(matriz1, matriz2))
+	WriteMatrix(matriz1)
+	fmt.Println("Transposta")
+	WriteMatrix(Transpose(matriz1))
 }
