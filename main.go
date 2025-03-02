@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"os"
 )
@@ -30,6 +31,15 @@ func Identity(n int) [][]float64 {
 	return id
 }
 
+func Dot(lambda float64, m [][]float64) [][]float64 {
+	for i := 0; i < len(m); i++ {
+		for j := 0; j < len(m[0]); j++ {
+			m[i][j] *= lambda
+		}
+	}
+	return m
+}
+
 func Transpose(m [][]float64) [][]float64 {
 	var t [][]float64
 	for i := 0; i < len(m); i++ {
@@ -38,6 +48,33 @@ func Transpose(m [][]float64) [][]float64 {
 	return t
 }
 
+
+func Inverse(m [][]float64) [][]float64 {
+	det := DetLaplace(m)
+	if det == 0 {
+		return nil 
+	}
+	var result [][]float64 
+	result = Dot((1/det),Adjoint(m))
+	return result
+}
+
+func CofactorsMatrix(m [][]float64) [][]float64 {
+	var result [][]float64 
+	for i := 0; i < len(m); i++ {
+		var l []float64
+		for j := 0; j < len(m); j++ {
+			log.Println("determinante", i, j, DetLaplace(Cofactors(m, i, j)))
+			l = append(l, math.Pow(-1, float64((j+1) + (i+1))) * DetLaplace(Cofactors(m, i, j)))
+		}
+		result = append(result, l)
+	}
+	return result
+}
+
+func Adjoint(m [][]float64) [][]float64 {
+	return Transpose(CofactorsMatrix(m))
+}
 
 func Lines(m [][]float64, l int) []float64 {
 	return m[l]
@@ -94,23 +131,23 @@ func MatrixProduct(m1, m2 [][]float64) [][]float64 {
 	return result 
 }
 
-func CofactorMatrix(m [][]float64, i, j int) [][]float64 {
+func Cofactors(m [][]float64, i, j int) [][]float64 {
 	var n [][]float64
 	for i2 := 0; i2 < len(m); i2++ {
 		if i2 == i {
-			continue 
+			continue // Ignora a linha 'i'
 		}
 		var l []float64
 		for j2 := 0; j2 < len(m); j2++ {
 			if j2 == j {
-				continue
+				continue // Ignora a coluna 'j'
 			}
-			l = append(l,m[i2][j2])
+			l = append(l, m[i2][j2])
 		}
 		n = append(n, l)
 	}
 	return n
-} 
+}
 
 func DetLaplace(m [][]float64) float64 {
 	if len(m) != len(m[0]) {
@@ -127,7 +164,7 @@ func DetLaplace(m [][]float64) float64 {
 	n := len(m)
 	i := 0
 	for j := 0; j < n; j++ {
-		det += math.Pow(-1, float64((j+1) + (i+1))) * m[i][j] * DetLaplace(CofactorMatrix(m, i, j))
+		det += math.Pow(-1, float64((j+1) + (i+1))) * m[i][j] * DetLaplace(Cofactors(m, i, j))
 	}
 	return det  
 }
@@ -138,14 +175,6 @@ func main() {
         {4, 8, 6},
         {7, 8, 10},
     }
-	matriz2 := [][]float64{
-        {2, 3, 4},
-        {5, 6, 7},
-        {8, 9, 11},
-    }
 
-	WriteMatrix(SumMatrix(matriz1, matriz2))
-	WriteMatrix(matriz1)
-	fmt.Println("Transposta")
-	WriteMatrix(Transpose(matriz1))
-}
+	WriteMatrix(Inverse(matriz1))
+}	
