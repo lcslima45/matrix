@@ -3,7 +3,33 @@ package main
 import (
 	"fmt"
 	"math"
+	"os"
 )
+
+func OutputMatrix(m [][]float64) {
+	file, _ := os.OpenFile("outputMatrix.txt", os.O_CREATE|os.O_WRONLY, 0644)
+	for _, line := range m {
+		fmt.Fprintln(file, line)
+	}
+	file.Close()
+}
+
+func WriteMatrix(m [][]float64) {
+	for i := 0; i < len(m); i++ {
+		fmt.Println(m[i])
+	}
+}
+
+func Identity(n int) [][]float64 {
+	id := make([][]float64, n)
+	for i := 0; i < n; i++ {
+		id[i] = make([]float64, n)
+		id[i][i] = 1
+	}
+
+	return id
+}
+
 func CofactorMatrix(m [][]float64, i, j int) [][]float64 {
 	var n [][]float64
 	for i2 := 0; i2 < len(m); i2++ {
@@ -43,25 +69,5 @@ func DetLaplace(m [][]float64) float64 {
 }
 
 func main() {
-	fmt.Println(DetLaplace([][]float64{
-		{8, 9, 7, 6, 8},
-		{10, 8, 3, 6, 6},
-		{6, 1, 7, 2, 3},
-		{8, 2, 10, 8, 3},
-		{3, 10, 4, 4, 7},
-	}))
-	fmt.Println(DetLaplace([][]float64{
-		{1, 0, 0, 0, 0},
-		{0, 1, 0, 0, 0},
-		{0, 0, 1, 0, 0},
-		{0, 0, 0, 1, 0},
-		{0, 0, 0, 0, 1},
-	}))
-	fmt.Println(DetLaplace([][]float64{
-		{1, 2, 3, 4, 5},
-		{1, 2, 3, 4, 5},
-		{6, 7, 8, 9, 10},
-		{11, 12, 13, 14, 15},
-		{16, 17, 18, 19, 20},
-	}))
+	OutputMatrix(Identity(100))
 }
