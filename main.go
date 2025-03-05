@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"os"
 )
@@ -64,7 +63,6 @@ func CofactorsMatrix(m [][]float64) [][]float64 {
 	for i := 0; i < len(m); i++ {
 		var l []float64
 		for j := 0; j < len(m); j++ {
-			log.Println("determinante", i, j, DetLaplace(Cofactors(m, i, j)))
 			l = append(l, math.Pow(-1, float64((j+1) + (i+1))) * DetLaplace(Cofactors(m, i, j)))
 		}
 		result = append(result, l)
@@ -99,6 +97,19 @@ func CrossProduct(a1, a2 []float64) float64 {
 	return sum 
 }
 
+func SumNMatrix(m1 ...[][]float64) [][]float64 {
+	if len(m1) == 0 {
+		return nil 
+	}
+	result := m1[0]
+
+	for i := 1; i < len(m1); i++ {
+		result = SumMatrix(result, m1[i])
+	}
+
+	return result
+}
+
 func SumMatrix(m1, m2 [][]float64) [][]float64 {
 	if len(m1) != len(m2) || len(m1[0]) != len(m2[0]) {
 		return nil
@@ -129,6 +140,19 @@ func MatrixProduct(m1, m2 [][]float64) [][]float64 {
 	}
 
 	return result 
+}
+
+func MatrixNProduct(m1 ...[][]float64) [][]float64 {
+	if len(m1) == 0 {
+		return nil
+	}
+	result := m1[0]
+
+	for i := 1; i < len(m1); i++ {
+		result = MatrixProduct(result, m1[i])
+	}
+
+	return result
 }
 
 func Cofactors(m [][]float64, i, j int) [][]float64 {
@@ -176,5 +200,18 @@ func main() {
         {7, 8, 10},
     }
 
-	WriteMatrix(Inverse(matriz1))
+	matriz2:= [][]float64{
+		{8,17,3},
+		{2,5,7},
+		{1,2,3},
+	}
+
+	matriz3 := [][]float64{
+		{69,17,40},
+		{6,12,7},
+		{41,32, 14},
+	}
+
+	WriteMatrix(SumNMatrix(matriz1, matriz2, matriz3))
+	WriteMatrix(MatrixNProduct(matriz1, matriz2, matriz3))
 }	
