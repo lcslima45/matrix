@@ -225,6 +225,15 @@ func Cofactors(m [][]float64, i, j int) [][]float64 {
 	return n
 }
 
+func DetGauss(m [][]float64) float64{
+	det := 1.0 
+	m1, _ := TriangularMatrix(m)
+	for i := 0; i < len(m); i++ {
+		det *= m1[i][i]
+	}
+	return det 
+}
+
 func DetLaplace(m [][]float64) float64 {
 	if len(m) != len(m[0]) {
 		return math.NaN()
@@ -264,8 +273,5 @@ func main() {
 		{7,8,9},
 		{1,2,3},
 	}
-	t, _ := TriangularMatrix(matriz2)
-	x := []float64{13,65,72}
-	WriteMatrix(t)
-	fmt.Println(ReverseSubstitution(t,x))
+	fmt.Println(DetLaplace(matriz2), DetGauss(matriz2))
 }	
