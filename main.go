@@ -58,6 +58,58 @@ func Inverse(m [][]float64) [][]float64 {
 	return result
 }
 
+func TriangularMatrix(m [][]float64) ([][]float64, int) {
+	if len(m) == 0 {
+		return nil, 0
+	}
+	changes := 1
+
+	for p := 0; p < len(m); p++ {
+		if p == len(m)-1 {
+			break
+		}
+		
+		pivot := m[p][p]
+		aux := p
+
+		for pivot == 0 && aux < len(m)-1 {
+			aux++
+			pivot = m[aux][p]
+		}
+
+		if pivot == 0 {
+			return nil, 0
+		}
+
+		if aux != p {
+			m[p], m[aux] = m[aux], m[p]
+			changes *= -1
+		}
+
+		for i := p + 1; i < len(m); i++ {
+			lambda := m[i][p] / m[p][p]
+			for j := p; j < len(m[0]); j++ { // Corrigido para j=p (não precisa alterar colunas já zeradas)
+				m[i][j] -= lambda * m[p][j]
+			}
+		}
+	}
+	return m, changes
+}
+
+func ReverseSubstitution(U [][]float64, b []float64) []float64 {
+	n := len(b)
+	x := make([]float64, n)
+
+	for i := n - 1; i >= 0; i-- {
+		sum := 0.0
+		for j := i + 1; j < n; j++ {
+			sum += U[i][j] * x[j]
+		}
+		x[i] = (b[i] - sum) / U[i][i]
+	}
+	return x
+}
+
 func CofactorsMatrix(m [][]float64) [][]float64 {
 	var result [][]float64 
 	for i := 0; i < len(m); i++ {
@@ -193,25 +245,27 @@ func DetLaplace(m [][]float64) float64 {
 	return det  
 }
 
-func main() {
-	matriz1 := [][]float64{
-        {1, 2, 3},
-        {4, 8, 6},
-        {7, 8, 10},
-    }
+func LinearlyDependent(m [][]float64) bool {
+	return DetLaplace(m) == 0 
+}
 
+func LinearlyIndependent(m [][]float64) bool {
+	return !LinearlyDependent(m)
+}
+
+func GaussMethod(m [][]float64, b []float64) []float64 {
+	t, _ := TriangularMatrix(m)
+	return ReverseSubstitution(t, b)
+}
+
+func main() {
 	matriz2:= [][]float64{
-		{8,17,3},
-		{2,5,7},
+		{4,3,6},
+		{7,8,9},
 		{1,2,3},
 	}
-
-	matriz3 := [][]float64{
-		{69,17,40},
-		{6,12,7},
-		{41,32, 14},
-	}
-
-	WriteMatrix(SumNMatrix(matriz1, matriz2, matriz3))
-	WriteMatrix(MatrixNProduct(matriz1, matriz2, matriz3))
+	t, _ := TriangularMatrix(matriz2)
+	x := []float64{13,65,72}
+	WriteMatrix(t)
+	fmt.Println(ReverseSubstitution(t,x))
 }	
