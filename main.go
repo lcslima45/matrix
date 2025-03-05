@@ -102,10 +102,10 @@ func ReverseSubstitution(U [][]float64, b []float64) []float64 {
 
 	for i := n - 1; i >= 0; i-- {
 		sum := 0.0
-		for j := i + 1; j < n; j++ {
-			sum += U[i][j] * x[j]
+		for j := i + 1; j < n; j++ { // Corrigido: começa de i+1
+			sum += U[i][j] * x[j]  // Corrigido: multiplica por x[j]
 		}
-		x[i] = (b[i] - sum) / U[i][i]
+		x[i] = (b[i] - sum) / U[i][i] // Divide pelo elemento da diagonal
 	}
 	return x
 }
