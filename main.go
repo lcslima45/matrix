@@ -58,6 +58,7 @@ func Inverse(m [][]float64) [][]float64 {
 	return result
 }
 
+
 func TriangularMatrix(m [][]float64) ([][]float64, int) {
 	if len(m) == 0 {
 		return nil, 0
@@ -262,10 +263,74 @@ func LinearlyIndependent(m [][]float64) bool {
 	return !LinearlyDependent(m)
 }
 
-func GaussMethod(m [][]float64, b []float64) []float64 {
-	t, _ := TriangularMatrix(m)
-	return ReverseSubstitution(t, b)
+func TriangularizeLinearSystem(m [][]float64, b []float64) ([][]float64, []float64) {
+	if len(m) == 0 {
+		return nil, nil
+	}
+
+	changes := 1 // Para controle de trocas de linhas
+
+	for p := 0; p < len(m); p++ {
+		if p == len(m)-1 {
+			break
+		}
+		pivot := m[p][p]
+		aux := p
+		for pivot == 0 && aux < len(m)-1 {
+			aux++
+			pivot = m[aux][p]
+		}
+		if pivot == 0 {
+			return nil, nil 
+		}
+		if aux != p {
+			m[p], m[aux] = m[aux], m[p]
+			b[p], b[aux] = b[aux], b[p] // Aplicando a troca no vetor b
+			changes *= -1
+		}
+		for i := p + 1; i < len(m); i++ {
+			lambda := m[i][p] / m[p][p]
+			for j := p; j < len(m[0]); j++ {
+				m[i][j] -= lambda * m[p][j]
+			}
+			b[i] -= lambda * b[p]
+		}
+	}
+	return m, b
 }
+
+func GaussMethod(m [][]float64, b []float64) []float64 {
+	m, b = TriangularizeLinearSystem(m, b)
+	if m == nil || b == nil {
+		return nil 
+	}
+	return ReverseSubstitution(m,b)
+}
+
+func DiagonalizeLinearSystem(m [][]float64, b []float64) ([][]float64, []float64) {
+	for i := len(m) - 1; i >= 0; i-- {
+		for j := i - 1; j >= 0; j-- {
+				lambda := m[j][i] / m[i][i]
+				m[j][i] -= lambda * m[i][i]
+				b[j] -= lambda * b[i]
+		}
+	}
+	return m, b
+}
+
+func GaussJordanMethod(m [][]float64, b []float64) []float64 {
+	m, b = TriangularizeLinearSystem(m, b)
+	if m == nil || b == nil {
+		return nil
+	}
+	x := make([]float64, len(b))
+	m, b = DiagonalizeLinearSystem(m,b) 
+	for i := 0; i < len(m); i++ {
+		x[i] = b[i] / m[i][i]
+	}
+	return x
+}
+
 
 func main() {
 	matriz2:= [][]float64{
@@ -273,5 +338,6 @@ func main() {
 		{7,8,9},
 		{1,2,3},
 	}
-	fmt.Println(DetLaplace(matriz2), DetGauss(matriz2))
+	b := []float64{13,14,21}
+	fmt.Println(GaussMethod(matriz2, b))
 }	
