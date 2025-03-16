@@ -59,11 +59,50 @@ func Inverse(m [][]float64) [][]float64 {
 }
 
 
-func TriangularMatrix(m [][]float64) ([][]float64, int) {
+func LowerTriangular(m [][]float64) ([][]float64, float64) {
 	if len(m) == 0 {
 		return nil, 0
 	}
-	changes := 1
+	changes := float64(1)
+
+	for p := len(m) - 1; p >= 0; p-- {
+		if p == 0 {
+			break
+		}
+
+		pivot := m[p][p]
+		aux := p
+
+		for pivot == 0 && aux > 0 {
+			aux--
+			pivot = m[aux][p]
+		}
+
+		if pivot == 0 {
+			return nil, 0
+		}
+
+		if aux != p {
+			m[p], m[aux] = m[aux], m[p]
+			changes *= -1
+		}
+
+		for i := p - 1; i >= 0; i-- {
+			lambda := m[i][p] / m[p][p]
+			for j := p; j >= 0; j-- { // Corrigido para j=p até 0 (apenas as colunas relevantes)
+				m[i][j] -= lambda * m[p][j]
+			}
+		}
+	}
+	return m, changes
+}
+
+
+func UpperTriangular(m [][]float64) ([][]float64, float64) {
+	if len(m) == 0 {
+		return nil, 0
+	}
+	changes := float64(1)
 
 	for p := 0; p < len(m); p++ {
 		if p == len(m)-1 {
@@ -228,11 +267,11 @@ func Cofactors(m [][]float64, i, j int) [][]float64 {
 
 func DetGauss(m [][]float64) float64{
 	det := 1.0 
-	m1, _ := TriangularMatrix(m)
+	m1, changes := UpperTriangular(m)
 	for i := 0; i < len(m); i++ {
 		det *= m1[i][i]
 	}
-	return det 
+	return det * changes  
 }
 
 func DetLaplace(m [][]float64) float64 {
@@ -256,14 +295,15 @@ func DetLaplace(m [][]float64) float64 {
 }
 
 func LinearlyDependent(m [][]float64) bool {
-	return DetLaplace(m) == 0 
+	return DetGauss(m) == 0 
 }
 
 func LinearlyIndependent(m [][]float64) bool {
 	return !LinearlyDependent(m)
 }
 
-func TriangularizeLinearSystem(m [][]float64, b []float64) ([][]float64, []float64) {
+
+func UpperTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) {
 	if len(m) == 0 {
 		return nil, nil
 	}
@@ -300,7 +340,7 @@ func TriangularizeLinearSystem(m [][]float64, b []float64) ([][]float64, []float
 }
 
 func GaussMethod(m [][]float64, b []float64) []float64 {
-	m, b = TriangularizeLinearSystem(m, b)
+	m, b = UpperTriangularSystem(m, b)
 	if m == nil || b == nil {
 		return nil 
 	}
@@ -319,7 +359,7 @@ func DiagonalizeLinearSystem(m [][]float64, b []float64) ([][]float64, []float64
 }
 
 func GaussJordanMethod(m [][]float64, b []float64) []float64 {
-	m, b = TriangularizeLinearSystem(m, b)
+	m, b = UpperTriangularSystem(m, b)
 	if m == nil || b == nil {
 		return nil
 	}
@@ -338,6 +378,5 @@ func main() {
 		{7,8,9},
 		{1,2,3},
 	}
-	b := []float64{13,14,21}
-	fmt.Println(GaussMethod(matriz2, b))
+	fmt.Println(DetGauss(matriz2))
 }	
