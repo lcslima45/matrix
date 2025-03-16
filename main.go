@@ -431,6 +431,48 @@ func GaussJordanMethod(m [][]float64, b []float64) []float64 {
 	return x
 }
 
+func LU(m [][]float64) ([][]float64, [][]float64) {
+	l := Identity(len(m))
+	u := m 
+	if len(u) == 0 {
+		return nil, nil 
+	}
+	changes := float64(1)
+
+	for p := 0; p < len(u); p++ {
+		if p == len(u)-1 {
+			break
+		}
+		
+		pivot := u[p][p]
+		aux := p
+
+		for pivot == 0 && aux < len(u)-1 {
+			aux++
+			pivot = u[aux][p]
+		}
+
+		if pivot == 0 {
+			return nil, nil 
+		}
+
+		if aux != p {
+			u[p], u[aux] = u[aux], u[p]
+			changes *= -1
+		}
+
+		for i := p + 1; i < len(u); i++ {
+			lambda := u[i][p] / u[p][p]
+			l[i][p] = lambda
+			for j := p; j < len(m[0]); j++ { // Corrigido para j=p (não precisa alterar colunas já zeradas)
+				u[i][j] -= lambda * u[p][j]
+			}
+		}
+	}
+
+	return l, u 
+}
+
 
 func main() {
 	matriz2:= [][]float64{
@@ -438,6 +480,8 @@ func main() {
 		{7,8,9},
 		{1,2,3},
 	}
-	b := []float64{32,17,20}
-	fmt.Println(GaussJordanMethod(matriz2, b))
+	// b := []float64{32,17,20}
+	l, u := LU(matriz2)
+	WriteMatrix(l)
+	WriteMatrix(u)
 }	
