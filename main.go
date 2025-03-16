@@ -136,7 +136,22 @@ func UpperTriangular(m [][]float64) ([][]float64, float64) {
 	return m, changes
 }
 
-func ReverseSubstitution(U [][]float64, b []float64) []float64 {
+func ForwardSubstitution(L [][]float64, b []float64) []float64 {
+	n := len(b)
+	y := make([]float64, n)
+
+	for i := 0; i < n; i++ {  // Processa cada linha de cima para baixo
+		sum := 0.0
+		for j := 0; j < i; j++ {  // Considera todos os elementos antes da diagonal
+			sum += L[i][j] * y[j]  // Multiplica pelo valor já calculado de y[j]
+		}
+		y[i] = (b[i] - sum) / L[i][i]  // Resolve o sistema com o termo independente
+	}
+	return y
+}
+
+
+func BackwardSubstitution(U [][]float64, b []float64) []float64 {
 	n := len(b)
 	x := make([]float64, n)
 
@@ -303,6 +318,43 @@ func LinearlyIndependent(m [][]float64) bool {
 }
 
 
+func LowerTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) {
+	if len(m) == 0 {
+		return nil, nil
+	}
+
+	changes := 1 // Para controle de trocas de linhas
+
+	for p := len(m) - 1; p >= 0; p-- {
+		if p == len(m)-1 {
+			break
+		}
+		pivot := m[p][p]
+		aux := p
+		for pivot == 0 && aux > 0 {
+			aux--
+			pivot = m[aux][p]
+		}
+		if pivot == 0 {
+			return nil, nil 
+		}
+		if aux != p {
+			m[p], m[aux] = m[aux], m[p]
+			b[p], b[aux] = b[aux], b[p] // Aplicando a troca no vetor b
+			changes *= -1
+		}
+		for i := p - 1; i >= 0; i-- {
+			lambda := m[i][p] / m[p][p]
+			for j := p; j >= 0; j-- { 
+				m[i][j] -= lambda * m[p][j]
+			}
+			b[i] -= lambda * b[p]
+		}
+	}
+	return m, b
+}
+
+
 func UpperTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) {
 	if len(m) == 0 {
 		return nil, nil
@@ -339,12 +391,20 @@ func UpperTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) 
 	return m, b
 }
 
+func GaussMethodForward(m [][]float64, b []float64) []float64 {
+	m, b = LowerTriangularSystem(m, b)
+	if m == nil || b == nil {
+		return nil 
+	}
+	return ForwardSubstitution(m,b)
+}
+
 func GaussMethod(m [][]float64, b []float64) []float64 {
 	m, b = UpperTriangularSystem(m, b)
 	if m == nil || b == nil {
 		return nil 
 	}
-	return ReverseSubstitution(m,b)
+	return BackwardSubstitution(m,b)
 }
 
 func DiagonalizeLinearSystem(m [][]float64, b []float64) ([][]float64, []float64) {
@@ -378,5 +438,6 @@ func main() {
 		{7,8,9},
 		{1,2,3},
 	}
-	fmt.Println(DetGauss(matriz2))
+	b := []float64{32,17,20}
+	fmt.Println(GaussJordanMethod(matriz2, b))
 }	
