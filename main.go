@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
 	"os"
 )
 
@@ -474,14 +476,39 @@ func LU(m [][]float64) ([][]float64, [][]float64) {
 }
 
 
-func main() {
-	matriz2:= [][]float64{
-		{4,3,6},
-		{7,8,9},
-		{1,2,3},
+type Matrix struct {
+	Matrix [][]float64 `json:"matrix"`
+}
+
+func handleMatrix(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+	// Handle preflight requests
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
 	}
-	// b := []float64{32,17,20}
-	l, u := LU(matriz2)
-	WriteMatrix(l)
-	WriteMatrix(u)
+	if r.Method == http.MethodPost {
+		var requestData Matrix
+		err := json.NewDecoder(r.Body).Decode(&requestData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		fmt.Println(requestData)
+		det := DetGauss(requestData.Matrix)
+		response := map[string]float64{"determinant": det}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
+	} else {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+	}
+}
+func main() {
+	http.HandleFunc("/determinant", handleMatrix)
+
+	fmt.Println("Servidor rodando na porta :8080")
+	http.ListenAndServe(":8080", nil)
 }	
