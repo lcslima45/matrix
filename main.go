@@ -480,6 +480,11 @@ type Matrix struct {
 	Matrix [][]float64 `json:"matrix"`
 }
 
+type LinearSystem struct {
+	Matrix [][]float64 `json:"matrix"`
+	B []float64 `json:"b"`
+}
+
 func handleMatrix(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
@@ -506,8 +511,34 @@ func handleMatrix(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 	}
 }
+
+func handleLinearSystem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	} else {
+		var requestData LinearSystem 
+		err := json.NewDecoder(r.Body).Decode(&requestData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		fmt.Println("matrix:", requestData.Matrix)
+		fmt.Println("b:", requestData.B)
+		result := GaussMethod(requestData.Matrix, requestData.B)
+		fmt.Println("result:", result)
+		response := map[string][]float64{"result": result}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
+	}
+}
+
 func main() {
 	http.HandleFunc("/determinant", handleMatrix)
+	http.HandleFunc("/linearsystem", handleLinearSystem)
 
 	fmt.Println("Servidor rodando na porta :8080")
 	http.ListenAndServe(":8080", nil)
