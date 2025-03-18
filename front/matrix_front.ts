@@ -118,7 +118,7 @@ function getLinearSystem() {
   console.log(matrix);
   console.log(b);
 
-  fetch("http://localhost:8080/determinant", {
+  fetch("http://localhost:8080/linearsystem", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
