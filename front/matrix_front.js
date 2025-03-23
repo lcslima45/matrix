@@ -82,7 +82,7 @@ function getLinearSystem() {
     for (var i = 0; i < size; i++) {
         matrix[i] = [];
         for (var j = 0; j <= size; j++) {
-            if (j != size) {
+            if (j !== size) {
                 var elmOfMatrix = document.getElementById("".concat(i).concat(j));
                 matrix[i][j] = parseFloat(elmOfMatrix.value);
             }
@@ -94,7 +94,7 @@ function getLinearSystem() {
     }
     console.log(matrix);
     console.log(b);
-    fetch("http://localhost:8080/determinant", {
+    fetch("http://localhost:8080/linearsystem", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -113,5 +113,72 @@ function getLinearSystem() {
     })
         .catch(function (error) {
         console.log("Erro ao enviar sistema linear", error);
+    });
+}
+function generateMatrixSum() {
+    var sizeInput = document.getElementById("sizeInput");
+    var divElement = document.getElementById("matrixContainer");
+    size = parseInt(sizeInput.value);
+    divElement.innerHTML = "";
+    for (var i = 0; i < size; i++) {
+        var row = document.createElement("div");
+        for (var j = 0; j < size; j++) {
+            var input = document.createElement("input");
+            input.id = "a".concat(i).concat(j);
+            input.type = "text";
+            row.appendChild(input);
+        }
+        divElement.appendChild(row);
+        if (i === size - 1) {
+            var sumEqual = document.createElement("span");
+            sumEqual.textContent = "+";
+            row.appendChild(sumEqual);
+        }
+    }
+    for (var i = 0; i < size; i++) {
+        var row = document.createElement("div");
+        for (var j = 0; j < size; j++) {
+            var input = document.createElement("input");
+            input.id = "b".concat(i).concat(j);
+            input.type = "number"; // Alterado para 'number' para garantir que seja um número
+            row.appendChild(input);
+        }
+        divElement.appendChild(row);
+    }
+    var detButton = document.createElement("input");
+    detButton.value = "Sum Matrix";
+    detButton.type = "button";
+    divElement.appendChild(detButton);
+    detButton.addEventListener("click", getMatrixSum);
+}
+function getMatrixSum() {
+    var matrixA = [];
+    var matrixB = [];
+    for (var i = 0; i < size; i++) {
+        matrixA[i] = [];
+        matrixB[i] = [];
+        for (var j = 0; j < size; j++) {
+            var elementOfMatrixA = document.getElementById("a".concat(i).concat(j));
+            var elementOfMatrixB = document.getElementById("b".concat(i).concat(j));
+            matrixA[i][j] = parseFloat(elementOfMatrixA.value);
+            matrixB[i][j] = parseFloat(elementOfMatrixB.value);
+        }
+    }
+    fetch("http://localhost:8080/sum", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ matrixA: matrixA, matrixB: matrixB }),
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+        var responseContainer = document.createElement("div");
+        responseContainer.innerHTML = "<div> Resposta </br> ".concat(JSON.stringify(data), " </br> </div>");
+        var matrixContainer = document.getElementById("matrixContainer");
+        matrixContainer.appendChild(responseContainer);
+    })
+        .catch(function (error) {
+        console.log("Erro ao enviar a soma", error);
     });
 }

@@ -44,22 +44,20 @@ func Dot(lambda float64, m [][]float64) [][]float64 {
 func Transpose(m [][]float64) [][]float64 {
 	var t [][]float64
 	for i := 0; i < len(m); i++ {
-		t = append(t, Columns(m,i))
+		t = append(t, Columns(m, i))
 	}
 	return t
 }
 
-
 func Inverse(m [][]float64) [][]float64 {
 	det := DetLaplace(m)
 	if det == 0 {
-		return nil 
+		return nil
 	}
-	var result [][]float64 
-	result = Dot((1/det),Adjoint(m))
+	var result [][]float64
+	result = Dot((1 / det), Adjoint(m))
 	return result
 }
-
 
 func LowerTriangular(m [][]float64) ([][]float64, float64) {
 	if len(m) == 0 {
@@ -99,7 +97,6 @@ func LowerTriangular(m [][]float64) ([][]float64, float64) {
 	return m, changes
 }
 
-
 func UpperTriangular(m [][]float64) ([][]float64, float64) {
 	if len(m) == 0 {
 		return nil, 0
@@ -110,7 +107,7 @@ func UpperTriangular(m [][]float64) ([][]float64, float64) {
 		if p == len(m)-1 {
 			break
 		}
-		
+
 		pivot := m[p][p]
 		aux := p
 
@@ -142,16 +139,15 @@ func ForwardSubstitution(L [][]float64, b []float64) []float64 {
 	n := len(b)
 	y := make([]float64, n)
 
-	for i := 0; i < n; i++ {  // Processa cada linha de cima para baixo
+	for i := 0; i < n; i++ { // Processa cada linha de cima para baixo
 		sum := 0.0
-		for j := 0; j < i; j++ {  // Considera todos os elementos antes da diagonal
-			sum += L[i][j] * y[j]  // Multiplica pelo valor já calculado de y[j]
+		for j := 0; j < i; j++ { // Considera todos os elementos antes da diagonal
+			sum += L[i][j] * y[j] // Multiplica pelo valor já calculado de y[j]
 		}
-		y[i] = (b[i] - sum) / L[i][i]  // Resolve o sistema com o termo independente
+		y[i] = (b[i] - sum) / L[i][i] // Resolve o sistema com o termo independente
 	}
 	return y
 }
-
 
 func BackwardSubstitution(U [][]float64, b []float64) []float64 {
 	n := len(b)
@@ -160,7 +156,7 @@ func BackwardSubstitution(U [][]float64, b []float64) []float64 {
 	for i := n - 1; i >= 0; i-- {
 		sum := 0.0
 		for j := i + 1; j < n; j++ { // Corrigido: começa de i+1
-			sum += U[i][j] * x[j]  // Corrigido: multiplica por x[j]
+			sum += U[i][j] * x[j] // Corrigido: multiplica por x[j]
 		}
 		x[i] = (b[i] - sum) / U[i][i] // Divide pelo elemento da diagonal
 	}
@@ -168,11 +164,11 @@ func BackwardSubstitution(U [][]float64, b []float64) []float64 {
 }
 
 func CofactorsMatrix(m [][]float64) [][]float64 {
-	var result [][]float64 
+	var result [][]float64
 	for i := 0; i < len(m); i++ {
 		var l []float64
 		for j := 0; j < len(m); j++ {
-			l = append(l, math.Pow(-1, float64((j+1) + (i+1))) * DetLaplace(Cofactors(m, i, j)))
+			l = append(l, math.Pow(-1, float64((j+1)+(i+1)))*DetLaplace(Cofactors(m, i, j)))
 		}
 		result = append(result, l)
 	}
@@ -201,14 +197,14 @@ func CrossProduct(a1, a2 []float64) float64 {
 	}
 	var sum float64
 	for i := 0; i < len(a1); i++ {
-		sum += a1[i] * a2[i] 
+		sum += a1[i] * a2[i]
 	}
-	return sum 
+	return sum
 }
 
 func SumNMatrix(m1 ...[][]float64) [][]float64 {
 	if len(m1) == 0 {
-		return nil 
+		return nil
 	}
 	result := m1[0]
 
@@ -227,7 +223,7 @@ func SumMatrix(m1, m2 [][]float64) [][]float64 {
 	for i := 0; i < len(m1); i++ {
 		var l []float64
 		for j := 0; j < len(m1[0]); j++ {
-			l = append(l, m1[i][j] + m2[i][j]) 
+			l = append(l, m1[i][j]+m2[i][j])
 		}
 		result = append(result, l)
 	}
@@ -243,12 +239,12 @@ func MatrixProduct(m1, m2 [][]float64) [][]float64 {
 	for i := 0; i < len(m1); i++ {
 		var l []float64
 		for j := 0; j < len(m2[0]); j++ {
-			l = append(l, CrossProduct(Lines(m1,i), Columns(m2,j)))
+			l = append(l, CrossProduct(Lines(m1, i), Columns(m2, j)))
 		}
 		result = append(result, l)
 	}
 
-	return result 
+	return result
 }
 
 func MatrixNProduct(m1 ...[][]float64) [][]float64 {
@@ -282,13 +278,13 @@ func Cofactors(m [][]float64, i, j int) [][]float64 {
 	return n
 }
 
-func DetGauss(m [][]float64) float64{
-	det := 1.0 
+func DetGauss(m [][]float64) float64 {
+	det := 1.0
 	m1, changes := UpperTriangular(m)
 	for i := 0; i < len(m); i++ {
 		det *= m1[i][i]
 	}
-	return det * changes  
+	return det * changes
 }
 
 func DetLaplace(m [][]float64) float64 {
@@ -306,19 +302,18 @@ func DetLaplace(m [][]float64) float64 {
 	n := len(m)
 	i := 0
 	for j := 0; j < n; j++ {
-		det += math.Pow(-1, float64((j+1) + (i+1))) * m[i][j] * DetLaplace(Cofactors(m, i, j))
+		det += math.Pow(-1, float64((j+1)+(i+1))) * m[i][j] * DetLaplace(Cofactors(m, i, j))
 	}
-	return det  
+	return det
 }
 
 func LinearlyDependent(m [][]float64) bool {
-	return DetGauss(m) == 0 
+	return DetGauss(m) == 0
 }
 
 func LinearlyIndependent(m [][]float64) bool {
 	return !LinearlyDependent(m)
 }
-
 
 func LowerTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) {
 	if len(m) == 0 {
@@ -338,7 +333,7 @@ func LowerTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) 
 			pivot = m[aux][p]
 		}
 		if pivot == 0 {
-			return nil, nil 
+			return nil, nil
 		}
 		if aux != p {
 			m[p], m[aux] = m[aux], m[p]
@@ -347,7 +342,7 @@ func LowerTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) 
 		}
 		for i := p - 1; i >= 0; i-- {
 			lambda := m[i][p] / m[p][p]
-			for j := p; j >= 0; j-- { 
+			for j := p; j >= 0; j-- {
 				m[i][j] -= lambda * m[p][j]
 			}
 			b[i] -= lambda * b[p]
@@ -355,7 +350,6 @@ func LowerTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) 
 	}
 	return m, b
 }
-
 
 func UpperTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) {
 	if len(m) == 0 {
@@ -375,7 +369,7 @@ func UpperTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) 
 			pivot = m[aux][p]
 		}
 		if pivot == 0 {
-			return nil, nil 
+			return nil, nil
 		}
 		if aux != p {
 			m[p], m[aux] = m[aux], m[p]
@@ -396,25 +390,25 @@ func UpperTriangularSystem(m [][]float64, b []float64) ([][]float64, []float64) 
 func GaussMethodForward(m [][]float64, b []float64) []float64 {
 	m, b = LowerTriangularSystem(m, b)
 	if m == nil || b == nil {
-		return nil 
+		return nil
 	}
-	return ForwardSubstitution(m,b)
+	return ForwardSubstitution(m, b)
 }
 
 func GaussMethod(m [][]float64, b []float64) []float64 {
 	m, b = UpperTriangularSystem(m, b)
 	if m == nil || b == nil {
-		return nil 
+		return nil
 	}
-	return BackwardSubstitution(m,b)
+	return BackwardSubstitution(m, b)
 }
 
 func DiagonalizeLinearSystem(m [][]float64, b []float64) ([][]float64, []float64) {
 	for i := len(m) - 1; i >= 0; i-- {
 		for j := i - 1; j >= 0; j-- {
-				lambda := m[j][i] / m[i][i]
-				m[j][i] -= lambda * m[i][i]
-				b[j] -= lambda * b[i]
+			lambda := m[j][i] / m[i][i]
+			m[j][i] -= lambda * m[i][i]
+			b[j] -= lambda * b[i]
 		}
 	}
 	return m, b
@@ -426,7 +420,7 @@ func GaussJordanMethod(m [][]float64, b []float64) []float64 {
 		return nil
 	}
 	x := make([]float64, len(b))
-	m, b = DiagonalizeLinearSystem(m,b) 
+	m, b = DiagonalizeLinearSystem(m, b)
 	for i := 0; i < len(m); i++ {
 		x[i] = b[i] / m[i][i]
 	}
@@ -435,9 +429,9 @@ func GaussJordanMethod(m [][]float64, b []float64) []float64 {
 
 func LU(m [][]float64) ([][]float64, [][]float64) {
 	l := Identity(len(m))
-	u := m 
+	u := m
 	if len(u) == 0 {
-		return nil, nil 
+		return nil, nil
 	}
 	changes := float64(1)
 
@@ -445,7 +439,7 @@ func LU(m [][]float64) ([][]float64, [][]float64) {
 		if p == len(u)-1 {
 			break
 		}
-		
+
 		pivot := u[p][p]
 		aux := p
 
@@ -455,7 +449,7 @@ func LU(m [][]float64) ([][]float64, [][]float64) {
 		}
 
 		if pivot == 0 {
-			return nil, nil 
+			return nil, nil
 		}
 
 		if aux != p {
@@ -472,9 +466,8 @@ func LU(m [][]float64) ([][]float64, [][]float64) {
 		}
 	}
 
-	return l, u 
+	return l, u
 }
-
 
 type Matrix struct {
 	Matrix [][]float64 `json:"matrix"`
@@ -482,7 +475,7 @@ type Matrix struct {
 
 type LinearSystem struct {
 	Matrix [][]float64 `json:"matrix"`
-	B []float64 `json:"b"`
+	B      []float64   `json:"b"`
 }
 
 func handleMatrix(w http.ResponseWriter, r *http.Request) {
@@ -520,7 +513,7 @@ func handleLinearSystem(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	} else {
-		var requestData LinearSystem 
+		var requestData LinearSystem
 		err := json.NewDecoder(r.Body).Decode(&requestData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -536,10 +529,40 @@ func handleLinearSystem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type MatrixSum struct {
+	MatrixA [][]float64 `json:"matrixA"`
+	MatrixB [][]float64 `json:"matrixB"`
+}
+
+func handlerSum(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	} else {
+		var requestData MatrixSum
+		err := json.NewDecoder(r.Body).Decode(&requestData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		fmt.Println("matrix:", requestData.MatrixA)
+		fmt.Println("b:", requestData.MatrixB)
+		result := SumMatrix(requestData.MatrixA, requestData.MatrixB)
+		fmt.Println("result:", result)
+		response := map[string][][]float64{"result": result}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
+	}
+}
+
 func main() {
 	http.HandleFunc("/determinant", handleMatrix)
 	http.HandleFunc("/linearsystem", handleLinearSystem)
+	http.HandleFunc("/sum", handlerSum)
 
 	fmt.Println("Servidor rodando na porta :8080")
 	http.ListenAndServe(":8080", nil)
-}	
+}
