@@ -17,16 +17,23 @@ type LinearSystem struct {
 	B      []float64   `json:"b"`
 }
 
-func HandleMatrix(w http.ResponseWriter, r *http.Request) {
+type MatrixSum struct {
+	MatrixA [][]float64 `json:"matrixA"`
+	MatrixB [][]float64 `json:"matrixB"`
+}
+
+func SetCrossPlatform(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-
-	// Handle preflight requests
 	if r.Method == http.MethodOptions {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
+}
+
+func HandleMatrix(w http.ResponseWriter, r *http.Request) {
+	SetCrossPlatform(w, r)
 	if r.Method == http.MethodPost {
 		var requestData Matrix
 		err := json.NewDecoder(r.Body).Decode(&requestData)
@@ -45,14 +52,9 @@ func HandleMatrix(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleLinearSystem(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
-	} else {
-		var requestData LinearSystem
+	SetCrossPlatform(w, r)
+	var requestData LinearSystem
+	if r.Method == http.MethodPost {
 		err := json.NewDecoder(r.Body).Decode(&requestData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -65,23 +67,15 @@ func HandleLinearSystem(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
+	} else {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 	}
 }
 
-type MatrixSum struct {
-	MatrixA [][]float64 `json:"matrixA"`
-	MatrixB [][]float64 `json:"matrixB"`
-}
-
 func HandlerSum(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
-	} else {
-		var requestData MatrixSum
+	SetCrossPlatform(w, r)
+	var requestData MatrixSum
+	if r.Method == http.MethodPost {
 		err := json.NewDecoder(r.Body).Decode(&requestData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -94,18 +88,15 @@ func HandlerSum(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
+	} else {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 	}
 }
 
-func HandlerProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
-	} else {
-		var requestData MatrixSum
+func HandleProduct(w http.ResponseWriter, r *http.Request) {
+	SetCrossPlatform(w, r)
+	var requestData MatrixSum
+	if r.Method == http.MethodPost {
 		err := json.NewDecoder(r.Body).Decode(&requestData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -118,5 +109,28 @@ func HandlerProduct(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
+	} else {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+	}
+}
+
+func HandleLUDecompose(w http.ResponseWriter, r *http.Request) {
+	SetCrossPlatform(w, r)
+	var requestData Matrix
+	if r.Method == http.MethodPost {
+		err := json.NewDecoder(r.Body).Decode(&requestData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		fmt.Println("matrix:", requestData.Matrix)
+		fmt.Println("b:", requestData.Matrix)
+		l, u := calc.LU(requestData.Matrix)
+		fmt.Println("result:", l, u)
+		response := map[string][][]float64{"l": l, "u": u}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
+	} else {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 	}
 }

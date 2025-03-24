@@ -11,7 +11,8 @@ func main() {
 	http.HandleFunc("/determinant", handlers.HandleMatrix)
 	http.HandleFunc("/linearsystem", handlers.HandleLinearSystem)
 	http.HandleFunc("/sum", handlers.HandlerSum)
-	http.HandleFunc("/product", handlers.HandlerProduct)
+	http.HandleFunc("/product", handlers.HandleProduct)
+	http.HandleFunc("/ludecompose", handlers.HandleLUDecompose)
 
 	fmt.Println("Servidor rodando na porta :8080")
 	http.ListenAndServe(":8080", nil)

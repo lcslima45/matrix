@@ -249,3 +249,52 @@ function getMatrixProduct() {
         console.log("Erro ao enviar o produto", error);
     });
 }
+function generateMatrixLU() {
+    var sizeInput = document.getElementById("sizeInput");
+    var divElement = document.getElementById("matrixContainer");
+    size = parseInt(sizeInput.value);
+    divElement.innerHTML = "";
+    for (var i = 0; i < size; i++) {
+        var row = document.createElement("div");
+        for (var j = 0; j < size; j++) {
+            var input = document.createElement("input");
+            input.id = "a".concat(i).concat(j);
+            input.type = "text";
+            row.appendChild(input);
+        }
+        divElement.appendChild(row);
+    }
+    var detButton = document.createElement("input");
+    detButton.value = "Make LU Decomposition";
+    detButton.type = "button";
+    divElement.appendChild(detButton);
+    detButton.addEventListener("click", getMatrixLU);
+}
+function getMatrixLU() {
+    var matrix = [];
+    for (var i = 0; i < size; i++) {
+        matrix[i] = [];
+        for (var j = 0; j < size; j++) {
+            var elementOfMatrixA = document.getElementById("a".concat(i).concat(j));
+            matrix[i][j] = parseFloat(elementOfMatrixA.value);
+        }
+    }
+    console.log(matrix);
+    fetch("http://localhost:8080/ludecompose", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ matrix: matrix }),
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+        var responseContainer = document.createElement("div");
+        responseContainer.innerHTML = "<div> Resposta </br> ".concat(JSON.stringify(data), " </br> </div>");
+        var matrixContainer = document.getElementById("matrixContainer");
+        matrixContainer.appendChild(responseContainer);
+    })
+        .catch(function (error) {
+        console.log("Erro ao enviar o LU", error);
+    });
+}
