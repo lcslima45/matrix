@@ -182,3 +182,70 @@ function getMatrixSum() {
         console.log("Erro ao enviar a soma", error);
     });
 }
+function generateMatrixProduct() {
+    var sizeInput = document.getElementById("sizeInput");
+    var divElement = document.getElementById("matrixContainer");
+    size = parseInt(sizeInput.value);
+    divElement.innerHTML = "";
+    for (var i = 0; i < size; i++) {
+        var row = document.createElement("div");
+        for (var j = 0; j < size; j++) {
+            var input = document.createElement("input");
+            input.id = "a".concat(i).concat(j);
+            input.type = "text";
+            row.appendChild(input);
+        }
+        divElement.appendChild(row);
+        if (i === size - 1) {
+            var sumEqual = document.createElement("span");
+            sumEqual.textContent = "X";
+            row.appendChild(sumEqual);
+        }
+    }
+    for (var i = 0; i < size; i++) {
+        var row = document.createElement("div");
+        for (var j = 0; j < size; j++) {
+            var input = document.createElement("input");
+            input.id = "b".concat(i).concat(j);
+            input.type = "number"; // Alterado para 'number' para garantir que seja um número
+            row.appendChild(input);
+        }
+        divElement.appendChild(row);
+    }
+    var detButton = document.createElement("input");
+    detButton.value = "Make Product";
+    detButton.type = "button";
+    divElement.appendChild(detButton);
+    detButton.addEventListener("click", getMatrixProduct);
+}
+function getMatrixProduct() {
+    var matrixA = [];
+    var matrixB = [];
+    for (var i = 0; i < size; i++) {
+        matrixA[i] = [];
+        matrixB[i] = [];
+        for (var j = 0; j < size; j++) {
+            var elementOfMatrixA = document.getElementById("a".concat(i).concat(j));
+            var elementOfMatrixB = document.getElementById("b".concat(i).concat(j));
+            matrixA[i][j] = parseFloat(elementOfMatrixA.value);
+            matrixB[i][j] = parseFloat(elementOfMatrixB.value);
+        }
+    }
+    fetch("http://localhost:8080/product", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ matrixA: matrixA, matrixB: matrixB }),
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+        var responseContainer = document.createElement("div");
+        responseContainer.innerHTML = "<div> Resposta </br> ".concat(JSON.stringify(data), " </br> </div>");
+        var matrixContainer = document.getElementById("matrixContainer");
+        matrixContainer.appendChild(responseContainer);
+    })
+        .catch(function (error) {
+        console.log("Erro ao enviar o produto", error);
+    });
+}
